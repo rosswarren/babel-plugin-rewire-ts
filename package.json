@@ -13,10 +13,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/speedskater/babel-plugin-rewire.git"
+    "url": "git://github.com/rosswarren/babel-plugin-rewire-ts.git"
   },
   "bugs": {
-    "url": "https://github.com/speedskater/babel-plugin-rewire/issues"
+    "url": "https://github.com/rosswarren/babel-plugin-rewire-ts/issues"
   },
   "keywords": [
     "babel",
