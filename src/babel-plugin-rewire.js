@@ -37,7 +37,8 @@ module.exports = function({ types: t, template }) {
 		!(parent.type === 'TSQualifiedName') &&
 		!(parent.type === 'TSTypeQuery') &&
 		!(parent.type === 'TSTypeReference') &&
-		!(parent.type === 'TSInterfaceDeclaration');
+		!(parent.type === 'TSInterfaceDeclaration') &&
+		!(parent.type === 'TSTypeAliasDeclaration');
 	}
 
 	function doesIdentifierRepresentAValidReference(path, variableBinding, rewireInformation) {
