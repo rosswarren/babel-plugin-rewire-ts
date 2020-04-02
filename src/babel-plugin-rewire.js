@@ -124,6 +124,8 @@ module.exports = function({ types: t, template }) {
 									existingClassDeclaration.decorators || []
 								)
 							);
+							scope.registerDeclaration(path);
+
 						} else {
 							exportIdentifier = existingClassDeclaration.id;
 						}
@@ -141,6 +143,8 @@ module.exports = function({ types: t, template }) {
 									existingFunctionDeclaration.async
 								)
 							);
+							scope.registerDeclaration(path);
+
 						} else if(path.parent.type === 'ExportDefaultDeclaration') {
 							exportIdentifier = existingFunctionDeclaration.id;
 						}
@@ -159,6 +163,7 @@ module.exports = function({ types: t, template }) {
 						t.variableDeclaration('let', [t.variableDeclarator(exportIdentifier, path.node.declaration)]),
 						noRewire(t.exportDefaultDeclaration(exportIdentifier))
 					]);
+					path.scope.registerDeclaration(path);
 				}
 				rewireInformation.enrichExport(exportIdentifier);
 			}
