@@ -111,12 +111,14 @@ module.exports = function({ types: t, template }) {
 				rewireInformation.hasES6Export = true;
 				rewireInformation.isES6Module = true;
 
+				let declarationPath;
+
 				let declarationVisitors = {
 					ClassDeclaration: function (path, rewireInformation) {
 						let {node: existingClassDeclaration, parent, scope} = path;
 						if (existingClassDeclaration.id === null && parent.type === 'ExportDefaultDeclaration') {
 							exportIdentifier = scope.generateUidIdentifier("DefaultExportValue");
-							path.replaceWith(
+							[declarationPath] = path.replaceWith(
 								t.classDeclaration(
 									exportIdentifier,
 									existingClassDeclaration.superClass,
@@ -124,6 +126,8 @@ module.exports = function({ types: t, template }) {
 									existingClassDeclaration.decorators || []
 								)
 							);
+							scope.registerDeclaration(declarationPath);
+
 						} else {
 							exportIdentifier = existingClassDeclaration.id;
 						}
@@ -132,7 +136,7 @@ module.exports = function({ types: t, template }) {
 						let {node: existingFunctionDeclaration, scope} = path;
 						if (existingFunctionDeclaration.id === null && path.parent.type === 'ExportDefaultDeclaration') {
 							exportIdentifier = scope.generateUidIdentifier("DefaultExportValue");
-							path.replaceWith(
+							[declarationPath] = path.replaceWith(
 								t.functionDeclaration(
 									exportIdentifier,
 									existingFunctionDeclaration.params,
@@ -141,6 +145,8 @@ module.exports = function({ types: t, template }) {
 									existingFunctionDeclaration.async
 								)
 							);
+							scope.registerDeclaration(declarationPath);
+
 						} else if(path.parent.type === 'ExportDefaultDeclaration') {
 							exportIdentifier = existingFunctionDeclaration.id;
 						}
@@ -155,10 +161,11 @@ module.exports = function({ types: t, template }) {
 				path.traverse(declarationVisitors, rewireInformation);
 				if (exportIdentifier === null) {
 					exportIdentifier = noRewire(path.scope.generateUidIdentifier("DefaultExportValue"));
-					path.replaceWithMultiple([
+					[declarationPath] = path.replaceWithMultiple([
 						t.variableDeclaration('let', [t.variableDeclarator(exportIdentifier, path.node.declaration)]),
 						noRewire(t.exportDefaultDeclaration(exportIdentifier))
 					]);
+					scope.registerDeclaration(declarationPath);
 				}
 				rewireInformation.enrichExport(exportIdentifier);
 			}
