@@ -24,7 +24,9 @@ export default class RewireState {
 	constructor(scope, types, template) {
 		t = types;
 		const templates = Templates(template);
+		
 		universalAccesorsTemplate = templates.universalAccesorsTemplate;
+		
 		enrichExportTemplate = templates.enrichExportTemplate;
 		filterWildcardImportTemplate = templates.filterWildcardImportTemplate;
 		this.isES6Module = false;
@@ -56,6 +58,8 @@ export default class RewireState {
 			__RewireAPI__: noRewire(scope.generateUidIdentifier('__RewireAPI__')),
 			__assignOperation: noRewire(scope.generateUidIdentifier('__assign__')),
 		};
+		scope.registerDeclaration("");
+
 	}
 
 	appendToProgramBody(nodes) {
