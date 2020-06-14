@@ -48,6 +48,10 @@ export default class RewireState {
 		this.assignmentOperationIdentifier = scope.generateUidIdentifier('__assign__');
 		this.typeofOriginalExportVariable = scope.generateUidIdentifier('typeOfOriginalExport');
 
+		// Tracks all the variables that are being exported.
+		// Key is the exported identifier while key is exported identifier.
+		this.exportedIdentifiers = new Map();
+
 		this.universalAccessors = {
 			__get__: noRewire(scope.generateUidIdentifier('__get__')),
 			__set__: noRewire(scope.generateUidIdentifier('__set__')),
@@ -80,7 +84,11 @@ export default class RewireState {
 
 		return this.accessors[variableName];
 	}
-	
+
+	addExportedIdentifier(exportedIdentifier, localIdentifier) {
+		this.exportedIdentifiers.set(exportedIdentifier, localIdentifier);
+	}
+
 	addTrackedIdentifier(variableName, isWildcardImport = false) {
 		this.isWildcardImport[variableName] = isWildcardImport
 		return this.trackedIdentfiers[variableName] = true;

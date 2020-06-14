@@ -91,7 +91,19 @@ module.exports = function({ types: t, template }) {
 			}
 		},
 
-		'ExportNamedDeclaration|ExportAllDeclaration': function ({node: {specifiers = []}}, rewireInformation) {
+		'ExportNamedDeclaration|ExportAllDeclaration': function (path, rewireInformation) {
+			const {node: {specifiers = []}} = path;
+
+			// We only add ExportNamedDeclaration's variable names here
+			// because ExportAllDeclaration is: "export * from ..."
+			if (path.isExportNamedDeclaration()) {
+				path.traverse({
+					Identifier(path) {
+						addExportsToRewireInformation(path, t, rewireInformation);
+					}
+				});
+			}
+
 			let hasDefaultExport = specifiers.some(function (specifier) {
 				return ((specifier.local && specifier.local.name === 'default') ||
 				(specifier.exported && specifier.exported.name === 'default'));
@@ -220,3 +232,89 @@ module.exports = function({ types: t, template }) {
 		visitor: ProgramVisitor
 	};
 };
+
+// This function is for every identifier in ExportNamedDeclaration.
+// Since the Delecaration field of ExportNamedFunction is very broad,
+// this is the easier way to do it. There are three possibilites
+// of the declaration field:
+//  - FunctionDeclaration: export function a() {}
+//  - ClassDeclaration: export class A {}
+//  - VariableDeclaratiion: export let a = .., b = ...;
+// (There are other possibilites but they are not possible
+//  i.e. TSInterfaceDeclaration.)
+// We also handle ExportsSepcifier here too.
+function addExportsToRewireInformation(path, t, rewireInformation) {
+	const { parent, node } = path;
+	if (t.isExportSpecifier(parent) && parent.exported.name !== node.name) {
+		// We need the exported.name not local.name for
+		// export { something as somethigElse } ...
+		// Here, local.name will be something, whereas the exported name
+		// will be somethingElse which we are after
+		return;
+	}
+
+	// Although, ast nodes should have null instead of undefined
+	// some nodes have undefined. This is mostly for id fields that
+	// that could be null. But we use is where needed because it
+	// takes up less space in conditional.
+	function isDefined(node) {
+		return (node !== undefined && node !== null);
+	}
+
+	const isVariableDeclaratorWithInit =
+		t.isVariableDeclarator(parent) && isDefined(parent.init);
+	if (isVariableDeclaratorWithInit && parent.init.name === node.name) {
+		// If the idenitifer we are adding is variable declarator's identifier
+		// don't add it. For example: exports const { a, b } = something;
+		// we don't want to add the something
+		return;
+	}
+
+	// getFunctionParent includes FunctionDeclaration and
+	// FunctionExpression.
+	const functionParent = path.getFunctionParent();
+	if (isDefined(functionParent)) {
+		// If functionParent.node.id is null that means it's
+		// a arrow or anonmyous function which shows up in expressions
+		if (!isDefined(functionParent.node.id)) {
+			return;
+		}
+
+		// If there is a function parent to this path, that means
+		// we are traversing over identifiers of a function. They
+		// are defienatly not exported so ignore them.
+		if (functionParent.node.id.name != node.name) {
+			return;
+		}
+	}
+
+	const classParent = path.find(p => p.isClassDeclaration() || p.isClassExpression());
+	if (isDefined(classParent) && isDefined(classParent.node.id) &&
+		classParent.node.id.name !== node.name) {
+		// Same as function conditional above; do not add indentifiers
+		// inside a class.
+		return;
+	}
+
+	// Finally, if parent of the function or a class is a variable declartor
+	// the we only want it's id identifier and not is init identifiers.
+	// init is field that holds the right side of the assignment.
+	if (isDefined(classParent) || isDefined(functionParent)) {
+		const declarator = path.find(p => p.isVariableDeclarator());
+		if (isDefined(declarator)) {
+			const init = declarator.node.init;
+			const functionNode = (functionParent || {}).node;
+			const classNode = (classParent || {}).node;
+			if (init === functionNode || init === classNode) {
+				return;
+			}
+		}
+	}
+
+	let localIdentifier = node.name;
+	if (t.isExportSpecifier(parent)) {
+		localIdentifier = parent.local.name;
+	}
+
+	rewireInformation.addExportedIdentifier(node.name, localIdentifier);
+}

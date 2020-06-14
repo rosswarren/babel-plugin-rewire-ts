@@ -14,7 +14,8 @@ describe('BabelRewirePluginTest', function() {
 			babelPluginRewire,
 			"syntax-async-functions",
 			"syntax-flow",
-			"transform-export-extensions"
+			"transform-export-extensions",
+			"transform-object-rest-spread",
 		]
 	};
 
@@ -26,7 +27,8 @@ describe('BabelRewirePluginTest', function() {
 			}],
 			"syntax-async-functions",
 			"syntax-flow",
-			"transform-export-extensions"
+			"transform-export-extensions",
+			"transform-object-rest-spread",
 		]
 	};
 
@@ -40,7 +42,8 @@ describe('BabelRewirePluginTest', function() {
 			"transform-es2015-template-literals",
 			"transform-es2015-typeof-symbol",
 			"transform-export-extensions",
-			"transform-regenerator"
+			"transform-regenerator",
+			"transform-object-rest-spread",
 		]
 	};
 
@@ -66,6 +69,7 @@ describe('BabelRewirePluginTest', function() {
 		}
 
 		var tempDir = path.resolve(os.tmpdir(), 'babel-plugin-rewire');
+		// console.log('TempDir: ' + tempDir);
 		try {
 			fs.mkdirSync(tempDir);
 		} catch(error) {}
@@ -152,7 +156,8 @@ describe('BabelRewirePluginTest', function() {
 		'issue136',
 		'issue152',
 		'issue155',
-		'issue184'
+		'issue184',
+		'track-exports-test',
 	];
 
 	var stage0FeaturesToTests = [
