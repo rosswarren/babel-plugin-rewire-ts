@@ -47,6 +47,9 @@ export default class RewireState {
 		this.updateOperationIdentifier = scope.generateUidIdentifier('__update_operation__');
 		this.assignmentOperationIdentifier = scope.generateUidIdentifier('__assign__');
 		this.typeofOriginalExportVariable = scope.generateUidIdentifier('typeOfOriginalExport');
+		this.updateOriginalExportIdentifier = scope.generateUidIdentifier('__update_export__');
+		this.originalExportsToResetIdentifier = scope.generateUidIdentifier('__exports_to_reset__');
+		this.recordOriginalExportIdentifier = scope.generateUidIdentifier('__record_export__');
 
 		// Tracks all the variables that are being exported.
 		// Key is the exported identifier while key is exported identifier.
@@ -134,6 +137,44 @@ export default class RewireState {
 			t.returnStatement(noRewire(t.identifier('undefined')))
 		]));
 
+		const updateOriginalExport = t.functionDeclaration(
+			this.updateOriginalExportIdentifier,
+			[ t.identifier('variableName'), valueVariable ],
+			t.blockStatement([
+				// switch (variableName)
+				t.switchStatement(t.identifier('variableName'),
+				[...this.exportedIdentifiers].map(([exportedId, localId]) => {
+					// export[exportedId]
+					const exportsAccessor = noRewire(t.memberExpression(
+						t.identifier('exports'),
+						t.identifier(exportedId)
+					));
+
+					// __record_export__(exportedId, localId)
+					const exportsMapUpdate = noRewire(t.callExpression(
+						this.recordOriginalExportIdentifier,
+						[ t.stringLiteral(exportedId), t.identifier(localId) ]
+					));
+
+					// return export[exportedId] = _value;
+					const returnStatement = t.returnStatement(
+						t.assignmentExpression('=', exportsAccessor, valueVariable)
+					);
+
+					// case <exportedId>:
+					//    __exports_to_update__.set(<exportedId>, localid)
+					//	  return export[exportedId] = value;
+					return t.switchCase(
+						t.stringLiteral(exportedId),
+						[t.expressionStatement(exportsMapUpdate), returnStatement]
+					);
+				})),
+
+				// return undefined;
+				t.returnStatement(noRewire(t.identifier('undefined')))
+			])
+		);
+
 		this.prependToProgramBody(universalAccesorsTemplate({
 			ORIGINAL_VARIABLE_ACCESSOR_IDENTIFIER: this.originalVariableAccessorIdentifier,
 			ORIGINAL_VARIABLE_SETTER_IDENTIFIER: this.originalVariableSetterIdentifier,
@@ -141,6 +182,10 @@ export default class RewireState {
 			UPDATE_OPERATION_IDENTIFIER: this.updateOperationIdentifier,
 			ORIGINAL_ACCESSOR: originalAccessor,
 			ORIGINAL_SETTER: originalSetter,
+			UPDATE_ORIGINAL_EXPORT: updateOriginalExport,
+			UPDATE_ORIGINAL_EXPORT_IDENTIFIER: this.updateOriginalExportIdentifier,
+			ORIGINAL_EXPORTS_TO_RESET_IDENTIFIER: this.originalExportsToResetIdentifier,
+			RECORD_ORIGINAL_EXPORT_IDENTIFIER: this.recordOriginalExportIdentifier,
 			UNIVERSAL_GETTER_ID :this.getUniversalGetterID(),
 			UNIVERSAL_SETTER_ID :this.getUniversalSetterID(),
 			UNIVERSAL_RESETTER_ID :this.getUniversalResetterID(),

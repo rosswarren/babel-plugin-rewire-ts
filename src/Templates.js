@@ -47,7 +47,7 @@ function GET_REWIRE_REGISTRY_IDENTIFIER() {
 	if(!theGlobalVariable.__$$GLOBAL_REWIRE_REGISTRY__) {
 		theGlobalVariable.__$$GLOBAL_REWIRE_REGISTRY__ = Object.create(null);
 	}
-	return theGlobalVariable.__$$GLOBAL_REWIRE_REGISTRY__; 
+	return theGlobalVariable.__$$GLOBAL_REWIRE_REGISTRY__;
 }
 
 function GET_REWIRE_DATA_IDENTIFIER() {
@@ -59,6 +59,20 @@ function GET_REWIRE_DATA_IDENTIFIER() {
 		rewireData = registry[moduleId];
 	}
 	return rewireData;
+}
+
+// This map contains the export variables to reset
+// when __Reset__ is called or when we resetting everything
+// because __rewire_reset_all__ is called.
+const ORIGINAL_EXPORTS_TO_RESET_IDENTIFIER = new Map();
+
+function RECORD_ORIGINAL_EXPORT_IDENTIFIER(variableName, value) {
+	// We do not update the export value because doing so
+	// will also record our (__Rewire__) updates to exports
+	// which we do not want.
+	if (!ORIGINAL_EXPORTS_TO_RESET_IDENTIFIER.has(variableName)) {
+		ORIGINAL_EXPORTS_TO_RESET_IDENTIFIER.set(variableName, value);
+	}
 }
 
 (function registerResetAll() {
@@ -107,6 +121,14 @@ ORIGINAL_ACCESSOR
 function ASSIGNMENT_OPERATION_IDENTIFIER(variableName, value) {
 	let rewireData = GET_REWIRE_DATA_IDENTIFIER();
 	if(rewireData[variableName] === undefined) {
+		// If we are updating an exported variable here and it's
+		// added to ORIGINAL_EXPORTS_TO_RESET_IDENTIFIER we need to
+		// update it.
+		var isExportedVar = Object.prototype.hasOwnProperty.call(exports, variableName);
+		if (isExportedVar && ORIGINAL_EXPORTS_TO_RESET_IDENTIFIER.has(variableName)) {
+			ORIGINAL_EXPORTS_TO_RESET_IDENTIFIER.set(variableName, value);
+		}
+
 		return ORIGINAL_VARIABLE_SETTER_IDENTIFIER(variableName, value);
 	} else {
 		return rewireData[variableName] = value;
@@ -121,6 +143,10 @@ function UPDATE_OPERATION_IDENTIFIER(operation, variableName, prefix) {
 	ASSIGNMENT_OPERATION_IDENTIFIER(variableName, newValue);
 	return (prefix) ? newValue : oldValue;
 }
+
+// This function is constructed inside RewireState and
+// takes in variableName, and value and updates the export.
+UPDATE_ORIGINAL_EXPORT
 
 function UNIVERSAL_SETTER_ID(variableName, value) {
 	let rewireData = GET_REWIRE_DATA_IDENTIFIER();
@@ -194,6 +220,10 @@ function UNIVERSAL_WITH_ID(object) {
 			"UNIVERSAL_RESETTER_ID",
 			"UNIVERSAL_WITH_ID",
 			"API_OBJECT_ID",
+			"UPDATE_ORIGINAL_EXPORT",
+			"UPDATE_ORIGINAL_EXPORT_IDENTIFIER",
+			"ORIGINAL_EXPORTS_TO_RESET_IDENTIFIER",
+			"RECORD_ORIGINAL_EXPORT_IDENTIFIER",
 			"GET_GLOBAL_VARIABLE_HANDLE_IDENTIFIER",
 			"GET_REWIRE_DATA_IDENTIFIER",
 			"GET_UNIQUE_GLOBAL_MODULE_ID_IDENTIFIER",

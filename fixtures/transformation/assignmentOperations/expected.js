@@ -114,6 +114,14 @@ function _getRewiredData__() {
 	return rewireData;
 }
 
+const _exports_to_reset__ = new Map();
+
+function _record_export__(variableName, value) {
+	if (!_exports_to_reset__.has(variableName)) {
+		_exports_to_reset__.set(variableName, value);
+	}
+}
+
 (function registerResetAll() {
 	let theGlobalVariable = _getGlobalObject();
 
@@ -174,6 +182,12 @@ function _assign__(variableName, value) {
 	let rewireData = _getRewiredData__();
 
 	if (rewireData[variableName] === undefined) {
+		var isExportedVar = Object.prototype.hasOwnProperty.call(exports, variableName);
+
+		if (isExportedVar && _exports_to_reset__.has(variableName)) {
+			_exports_to_reset__.set(variableName, value);
+		}
+
 		return _set_original__(variableName, value);
 	} else {
 		return rewireData[variableName] = value;
@@ -197,6 +211,82 @@ function _update_operation__(operation, variableName, prefix) {
 	_assign__(variableName, newValue);
 
 	return prefix ? newValue : oldValue;
+}
+
+function _update_export__(variableName, _value) {
+	switch (variableName) {
+		case 'getValue':
+			_record_export__('getValue', getValue);
+
+			return exports.getValue = _value;
+
+		case 'setValue':
+			_record_export__('setValue', setValue);
+
+			return exports.setValue = _value;
+
+		case 'assign':
+			_record_export__('assign', assign);
+
+			return exports.assign = _value;
+
+		case 'additionAssignement':
+			_record_export__('additionAssignement', additionAssignement);
+
+			return exports.additionAssignement = _value;
+
+		case 'subtractionAssignment':
+			_record_export__('subtractionAssignment', subtractionAssignment);
+
+			return exports.subtractionAssignment = _value;
+
+		case 'multiplicationAssignment':
+			_record_export__('multiplicationAssignment', multiplicationAssignment);
+
+			return exports.multiplicationAssignment = _value;
+
+		case 'divisionAssignment':
+			_record_export__('divisionAssignment', divisionAssignment);
+
+			return exports.divisionAssignment = _value;
+
+		case 'remainderAssignement':
+			_record_export__('remainderAssignement', remainderAssignement);
+
+			return exports.remainderAssignement = _value;
+
+		case 'leftShiftAssignment':
+			_record_export__('leftShiftAssignment', leftShiftAssignment);
+
+			return exports.leftShiftAssignment = _value;
+
+		case 'rightShiftAssignment':
+			_record_export__('rightShiftAssignment', rightShiftAssignment);
+
+			return exports.rightShiftAssignment = _value;
+
+		case 'unsignedRightShiftAssignment':
+			_record_export__('unsignedRightShiftAssignment', unsignedRightShiftAssignment);
+
+			return exports.unsignedRightShiftAssignment = _value;
+
+		case 'bitwiseAndAssignement':
+			_record_export__('bitwiseAndAssignement', bitwiseAndAssignement);
+
+			return exports.bitwiseAndAssignement = _value;
+
+		case 'bitwiseOrAssignement':
+			_record_export__('bitwiseOrAssignement', bitwiseOrAssignement);
+
+			return exports.bitwiseOrAssignement = _value;
+
+		case 'bitwiseXorAssignment':
+			_record_export__('bitwiseXorAssignment', bitwiseXorAssignment);
+
+			return exports.bitwiseXorAssignment = _value;
+	}
+
+	return undefined;
 }
 
 function _set__(variableName, value) {

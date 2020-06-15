@@ -101,6 +101,14 @@ function _getRewiredData__() {
 	return rewireData;
 }
 
+const _exports_to_reset__ = new Map();
+
+function _record_export__(variableName, value) {
+	if (!_exports_to_reset__.has(variableName)) {
+		_exports_to_reset__.set(variableName, value);
+	}
+}
+
 (function registerResetAll() {
 	let theGlobalVariable = _getGlobalObject();
 
@@ -170,6 +178,12 @@ function _assign__(variableName, value) {
 	let rewireData = _getRewiredData__();
 
 	if (rewireData[variableName] === undefined) {
+		var isExportedVar = Object.prototype.hasOwnProperty.call(exports, variableName);
+
+		if (isExportedVar && _exports_to_reset__.has(variableName)) {
+			_exports_to_reset__.set(variableName, value);
+		}
+
 		return _set_original__(variableName, value);
 	} else {
 		return rewireData[variableName] = value;
@@ -190,6 +204,17 @@ function _update_operation__(operation, variableName, prefix) {
 	_assign__(variableName, newValue);
 
 	return prefix ? newValue : oldValue;
+}
+
+function _update_export__(variableName, _value) {
+	switch (variableName) {
+		case 'another':
+			_record_export__('another', another);
+
+			return exports.another = _value;
+	}
+
+	return undefined;
 }
 
 function _set__(variableName, value) {
