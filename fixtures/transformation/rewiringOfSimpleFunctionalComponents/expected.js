@@ -247,6 +247,14 @@ function _reset__(variableName) {
 
 	delete rewireData[variableName];
 
+	if (_exports_to_reset__.has(variableName)) {
+		const value = _exports_to_reset__.get(variableName);
+
+		_update_export__(variableName, value);
+
+		_exports_to_reset__.delete(variableName);
+	}
+
 	if (Object.keys(rewireData).length == 0) {
 		delete _getRewireRegistry__()[_getRewireModuleId__];
 	}

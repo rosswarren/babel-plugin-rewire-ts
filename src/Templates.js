@@ -176,6 +176,13 @@ function UNIVERSAL_SETTER_ID(variableName, value) {
 function UNIVERSAL_RESETTER_ID(variableName) {
 	let rewireData = GET_REWIRE_DATA_IDENTIFIER();
 	delete rewireData[variableName];
+
+	if (ORIGINAL_EXPORTS_TO_RESET_IDENTIFIER.has(variableName)) {
+		const value = ORIGINAL_EXPORTS_TO_RESET_IDENTIFIER.get(variableName);
+		UPDATE_ORIGINAL_EXPORT_IDENTIFIER(variableName, value);
+		ORIGINAL_EXPORTS_TO_RESET_IDENTIFIER.delete(variableName);
+	}
+
 	if(Object.keys(rewireData).length == 0) {
 		delete GET_REWIRE_REGISTRY_IDENTIFIER()[GET_UNIQUE_GLOBAL_MODULE_ID_IDENTIFIER];
 	};
