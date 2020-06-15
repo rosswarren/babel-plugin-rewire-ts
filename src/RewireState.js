@@ -50,6 +50,7 @@ export default class RewireState {
 		this.updateOriginalExportIdentifier = scope.generateUidIdentifier('__update_export__');
 		this.originalExportsToResetIdentifier = scope.generateUidIdentifier('__exports_to_reset__');
 		this.recordOriginalExportIdentifier = scope.generateUidIdentifier('__record_export__');
+		this.restoreExportsIdentifier = scope.generateUidIdentifier('__restore_exports__');
 
 		// Tracks all the variables that are being exported.
 		// Key is the exported identifier while key is exported identifier.
@@ -186,6 +187,7 @@ export default class RewireState {
 			UPDATE_ORIGINAL_EXPORT_IDENTIFIER: this.updateOriginalExportIdentifier,
 			ORIGINAL_EXPORTS_TO_RESET_IDENTIFIER: this.originalExportsToResetIdentifier,
 			RECORD_ORIGINAL_EXPORT_IDENTIFIER: this.recordOriginalExportIdentifier,
+			RESTORE_EXPORTS_IDENTIFIER: this.restoreExportsIdentifier,
 			UNIVERSAL_GETTER_ID :this.getUniversalGetterID(),
 			UNIVERSAL_SETTER_ID :this.getUniversalSetterID(),
 			UNIVERSAL_RESETTER_ID :this.getUniversalResetterID(),

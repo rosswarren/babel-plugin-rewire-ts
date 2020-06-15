@@ -46,25 +46,41 @@ function GET_REWIRE_REGISTRY_IDENTIFIER() {
 	let theGlobalVariable = GET_GLOBAL_VARIABLE_HANDLE_IDENTIFIER();
 	if(!theGlobalVariable.__$$GLOBAL_REWIRE_REGISTRY__) {
 		theGlobalVariable.__$$GLOBAL_REWIRE_REGISTRY__ = Object.create(null);
+		theGlobalVariable.__$$GLOBAL_REWIRE_EXPORTS_REGISTRY__ = Object.create(null);
 	}
 	return theGlobalVariable.__$$GLOBAL_REWIRE_REGISTRY__;
-}
-
-function GET_REWIRE_DATA_IDENTIFIER() {
-	let moduleId = GET_UNIQUE_GLOBAL_MODULE_ID_IDENTIFIER();
-	let registry = GET_REWIRE_REGISTRY_IDENTIFIER();
-	let rewireData = registry[moduleId];
-	if(!rewireData) {
-		registry[moduleId] = Object.create(null);
-		rewireData = registry[moduleId];
-	}
-	return rewireData;
 }
 
 // This map contains the export variables to reset
 // when __Reset__ is called or when we resetting everything
 // because __rewire_reset_all__ is called.
 const ORIGINAL_EXPORTS_TO_RESET_IDENTIFIER = new Map();
+
+// Restores all the exports.
+function RESTORE_EXPORTS_IDENTIFIER() {
+	const entries = ORIGINAL_EXPORTS_TO_RESET_IDENTIFIER.entries();
+	for (const [variableName, value] of entries) {
+		exports[variableName] = value;
+		ORIGINAL_EXPORTS_TO_RESET_IDENTIFIER.delete(variableName);
+	}
+}
+
+function GET_REWIRE_DATA_IDENTIFIER() {
+	let theGlobalVariable = GET_GLOBAL_VARIABLE_HANDLE_IDENTIFIER();
+	let moduleId = GET_UNIQUE_GLOBAL_MODULE_ID_IDENTIFIER();
+	let registry = GET_REWIRE_REGISTRY_IDENTIFIER();
+	let rewireData = registry[moduleId];
+	if(!rewireData) {
+		// Attach the exports to reset map. We do this here,
+		// only need to do it once.
+		const exportsData = theGlobalVariable.__$$GLOBAL_REWIRE_EXPORTS_REGISTRY__;
+		exportsData[moduleId] = RESTORE_EXPORTS_IDENTIFIER;
+
+		registry[moduleId] = Object.create(null);
+		rewireData = registry[moduleId];
+	}
+	return rewireData;
+}
 
 function RECORD_ORIGINAL_EXPORT_IDENTIFIER(variableName, value) {
 	// We do not update the export value because doing so
@@ -80,6 +96,14 @@ function RECORD_ORIGINAL_EXPORT_IDENTIFIER(variableName, value) {
 	if(!theGlobalVariable['__rewire_reset_all__']) {
 		theGlobalVariable['__rewire_reset_all__'] = function() {
 			theGlobalVariable.__$$GLOBAL_REWIRE_REGISTRY__ = Object.create(null);
+
+			// Restore all the exports updates.
+			const restoreFuncs = Object.values(theGlobalVariable.__$$GLOBAL_REWIRE_EXPORTS_REGISTRY__);
+			for (const restoreFunc of restoreFuncs) {
+				restoreFunc();
+			}
+
+			theGlobalVariable.__$$GLOBAL_REWIRE_EXPORTS_REGISTRY__ = Object.create(null);
 		};
 	}
 })();
@@ -227,6 +251,7 @@ function UNIVERSAL_WITH_ID(object) {
 			"UNIVERSAL_RESETTER_ID",
 			"UNIVERSAL_WITH_ID",
 			"API_OBJECT_ID",
+			"RESTORE_EXPORTS_IDENTIFIER",
 			"UPDATE_ORIGINAL_EXPORT",
 			"UPDATE_ORIGINAL_EXPORT_IDENTIFIER",
 			"ORIGINAL_EXPORTS_TO_RESET_IDENTIFIER",

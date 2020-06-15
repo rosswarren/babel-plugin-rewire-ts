@@ -56,12 +56,27 @@ function _getRewireRegistry__() {
 
 	if (!theGlobalVariable.__$$GLOBAL_REWIRE_REGISTRY__) {
 		theGlobalVariable.__$$GLOBAL_REWIRE_REGISTRY__ = Object.create(null);
+		theGlobalVariable.__$$GLOBAL_REWIRE_EXPORTS_REGISTRY__ = Object.create(null);
 	}
 
 	return theGlobalVariable.__$$GLOBAL_REWIRE_REGISTRY__;
 }
 
+const _exports_to_reset__ = new Map();
+
+function _restore_exports__() {
+	const entries = _exports_to_reset__.entries();
+
+	for (const [variableName, value] of entries) {
+		exports[variableName] = value;
+
+		_exports_to_reset__.delete(variableName);
+	}
+}
+
 function _getRewiredData__() {
+	let theGlobalVariable = _getGlobalObject();
+
 	let moduleId = _getRewireModuleId__();
 
 	let registry = _getRewireRegistry__();
@@ -69,14 +84,14 @@ function _getRewiredData__() {
 	let rewireData = registry[moduleId];
 
 	if (!rewireData) {
+		const exportsData = theGlobalVariable.__$$GLOBAL_REWIRE_EXPORTS_REGISTRY__;
+		exportsData[moduleId] = _restore_exports__;
 		registry[moduleId] = Object.create(null);
 		rewireData = registry[moduleId];
 	}
 
 	return rewireData;
 }
-
-const _exports_to_reset__ = new Map();
 
 function _record_export__(variableName, value) {
 	if (!_exports_to_reset__.has(variableName)) {
@@ -90,6 +105,13 @@ function _record_export__(variableName, value) {
 	if (!theGlobalVariable['__rewire_reset_all__']) {
 		theGlobalVariable['__rewire_reset_all__'] = function () {
 			theGlobalVariable.__$$GLOBAL_REWIRE_REGISTRY__ = Object.create(null);
+			const restoreFuncs = Object.values(theGlobalVariable.__$$GLOBAL_REWIRE_EXPORTS_REGISTRY__);
+
+			for (const restoreFunc of restoreFuncs) {
+				restoreFunc();
+			}
+
+			theGlobalVariable.__$$GLOBAL_REWIRE_EXPORTS_REGISTRY__ = Object.create(null);
 		};
 	}
 })();
