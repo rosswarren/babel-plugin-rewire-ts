@@ -250,6 +250,8 @@ function _set__(variableName, value) {
 			});
 		};
 	} else {
+		_update_export__(variableName, value);
+
 		if (value === undefined) {
 			rewireData[variableName] = INTENTIONAL_UNDEFINED;
 		} else {

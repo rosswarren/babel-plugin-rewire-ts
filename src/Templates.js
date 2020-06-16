@@ -185,6 +185,7 @@ function UNIVERSAL_SETTER_ID(variableName, value) {
 			});
 		}
 	} else {
+		UPDATE_ORIGINAL_EXPORT_IDENTIFIER(variableName, value);
 		if (value === undefined) {
 			rewireData[variableName] = INTENTIONAL_UNDEFINED
 		} else {
