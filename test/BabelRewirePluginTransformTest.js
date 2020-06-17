@@ -50,14 +50,22 @@ describe('BabelRewirePluginTest', function() {
 		var input = fs.readFileSync(path.resolve(directory, 'input.js'), 'utf-8');
 		var expected = fs.readFileSync(path.resolve(directory, 'expected.js'), 'utf-8');
 
+		// For non-windows system such as Linux, the test fails because
+		// expected has \r\n, windows line ending, while the output has
+		// just \n. To fix this just replace \r\n with os.EOL.
+		expected = expected.replace(/(\r)?\n/gm, os.EOL).trim();
+
 		try {
+			// Although the transformation output has os.EOL in it's
+			// output, the comments still have /r/n. So we replace /r/n
+			// with os.EOL here as well.
 			var transformationOutput = babel.transform(input, options).code;
+			transformationOutput = transformationOutput.replace(/(\r)?\n/gm, os.EOL).trim();
 		} catch(error) {
 			expect().fail("Transformation failed: \n" + error.stack)
 		}
 
 		var tempDir = path.resolve(os.tmpdir(), 'babel-plugin-rewire');
-		console.log('TempDir: ' + tempDir);
 		try {
 			fs.mkdirSync(tempDir);
 		} catch(error) {}
@@ -65,9 +73,10 @@ describe('BabelRewirePluginTest', function() {
 		fs.writeFileSync(tempDir + '/testexpected' + testName + '.js', transformationOutput, 'utf-8');
 		//fs.writeFileSync(path.resolve(directory, 'expected.js'), transformationOutput, 'utf-8');
 
-		if(expected.trim() != transformationOutput.trim()) {
+		if (expected.trim() != transformationOutput.trim()) {
 			console.log(transformationOutput);
 		}
+
 		expect(transformationOutput.trim()).to.be(expected.trim());
 	}
 
