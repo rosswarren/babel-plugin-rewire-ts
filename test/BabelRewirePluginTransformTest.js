@@ -52,7 +52,7 @@ describe('BabelRewirePluginTest', function() {
 
 		// For non-windows system such as Linux, the test fails because
 		// expected has \r\n, windows line ending, while the output has
-		// just \n. To fix this just replace \r\r with os.EOL.
+		// just \n. To fix this just replace \r\n with os.EOL.
 		expected = expected.replace(/(\r)?\n/gm, os.EOL).trim();
 
 		try {
