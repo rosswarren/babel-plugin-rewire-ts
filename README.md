@@ -332,7 +332,8 @@ $ npm install babel-core babel-plugin-rewire
 
 ## Usage
 
-To use the plugin identify it by its long name "babel-plugin-rewire" or by its abbreviation "rewire". In case you are using rewire.js in the same project you must use the unabbreviated plugin name. Otherwise babel is trying to load rewire.js as a plugin which will cause an [error](https://github.com/speedskater/babel-plugin-rewire/issues/5).
+To use the plugin identify it by its long name "babel-plugin-rewire-ts" or by its abbreviation
+"rewire-ts".
 
 ### Commandline
 
