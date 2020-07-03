@@ -335,6 +335,20 @@ $ npm install babel-core babel-plugin-rewire
 To use the plugin identify it by its long name "babel-plugin-rewire-ts" or by its abbreviation
 "rewire-ts".
 
+If you are using `@babel/plugin-tranform-typescript` and encounter these warnings:
+```
+The exported identifier "_get__" is not declared in Babel's scope tracker
+as a JavaScript value binding, and "@babel/plugin-transform-typescript"
+never encountered it as a TypeScript type declaration.
+It will be treated as a JavaScript value.
+...
+```
+
+We recommend you switch to `@babel/preset-typescript`, since it type-checks
+your code while the plugin does not. Or use `@babel/preset-env` along with
+the plugin to resolve those warnings. We already fixed the issue on our side
+and reason behind those warning is unclear and they are harmless.
+
 ### Commandline
 
 abbreviated:
