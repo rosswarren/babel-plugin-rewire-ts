@@ -68,19 +68,19 @@ module.exports = function({ types: t, template }) {
 				if(isRewireable(path, variableBinding) && contains(variableBinding.referencePaths, path)) {
 					if (parent.type === 'UpdateExpression') {
 						rewireInformation.addUpdateableVariable(variableName);
-						path.parentPath.replaceWith(t.callExpression(rewireInformation.getUpdateOperationID(), [t.stringLiteral(parent.operator), t.stringLiteral(variableName), t.booleanLiteral(parent.prefix)]));
+						replaceWith(path.parentPath, t.callExpression(rewireInformation.getUpdateOperationID(), [t.stringLiteral(parent.operator), t.stringLiteral(variableName), t.booleanLiteral(parent.prefix)]));
 					} else {
 						rewireInformation.ensureAccessor(variableName, isWildCardImport);
-						path.replaceWith(t.callExpression(rewireInformation.getUniversalGetterID(), [t.stringLiteral(variableName)]));
+						replaceWith(path, t.callExpression(rewireInformation.getUniversalGetterID(), [t.stringLiteral(variableName)]));
 					}
 				} else if(parent.type === 'AssignmentExpression' && parent.left == node) {
 					rewireInformation.addUpdateableVariable(variableName);
 
 					if(parent.operator === '=') {
-						path.parentPath.replaceWith(noRewire(t.callExpression(rewireInformation.getAssignmentOperationID(), [t.stringLiteral(variableName), parent.right])));
+						replaceWith(path.parentPath, noRewire(t.callExpression(rewireInformation.getAssignmentOperationID(), [t.stringLiteral(variableName), parent.right])));
 					} else {
 						let baseOperator = parent.operator.substring(0, parent.operator.length - 1);
-						path.parentPath.replaceWith(t.assignmentExpression('=', parent.left, t.binaryExpression(baseOperator, t.callExpression(rewireInformation.getUniversalGetterID(), [t.stringLiteral(variableName)]), parent.right)));
+						replaceWith(path.parentPath, t.assignmentExpression('=', parent.left, t.binaryExpression(baseOperator, t.callExpression(rewireInformation.getUniversalGetterID(), [t.stringLiteral(variableName)]), parent.right)));
 					}
 					//TODO variable bindings add accessor for each variable declaration even if its unused. The reason is that any other plugin could potentially change the code otherwise
 				}
@@ -116,7 +116,7 @@ module.exports = function({ types: t, template }) {
 						let {node: existingClassDeclaration, parent, scope} = path;
 						if (existingClassDeclaration.id === null && parent.type === 'ExportDefaultDeclaration') {
 							exportIdentifier = scope.generateUidIdentifier("DefaultExportValue");
-							path.replaceWith(
+							replaceWith(path,
 								t.classDeclaration(
 									exportIdentifier,
 									existingClassDeclaration.superClass,
@@ -132,7 +132,7 @@ module.exports = function({ types: t, template }) {
 						let {node: existingFunctionDeclaration, scope} = path;
 						if (existingFunctionDeclaration.id === null && path.parent.type === 'ExportDefaultDeclaration') {
 							exportIdentifier = scope.generateUidIdentifier("DefaultExportValue");
-							path.replaceWith(
+							replaceWith(path,
 								t.functionDeclaration(
 									exportIdentifier,
 									existingFunctionDeclaration.params,
@@ -155,7 +155,7 @@ module.exports = function({ types: t, template }) {
 				path.traverse(declarationVisitors, rewireInformation);
 				if (exportIdentifier === null) {
 					exportIdentifier = noRewire(path.scope.generateUidIdentifier("DefaultExportValue"));
-					path.replaceWithMultiple([
+					replaceWithMultiple(path, [
 						t.variableDeclaration('let', [t.variableDeclarator(exportIdentifier, path.node.declaration)]),
 						noRewire(t.exportDefaultDeclaration(exportIdentifier))
 					]);
@@ -183,7 +183,7 @@ module.exports = function({ types: t, template }) {
 			) {
 				let isWildCardImport = (variableBinding.path.type === 'ImportNamespaceSpecifier');
 				rewireInformation.ensureAccessor(variableName, isWildCardImport);
-				path.replaceWith(t.callExpression(rewireInformation.getUniversalGetterID(), [t.stringLiteral(variableName)]));
+				replaceWith(path, t.callExpression(rewireInformation.getUniversalGetterID(), [t.stringLiteral(variableName)]));
 			}
 		}
 	};
@@ -209,7 +209,7 @@ module.exports = function({ types: t, template }) {
 						rewireState.prependUniversalAccessors(scope);
 						rewireState.appendExports();
 
-						path.pushContainer("body", rewireState.nodesToAppendToProgramBody);
+						registerDeclarations(path.pushContainer("body", rewireState.nodesToAppendToProgramBody));
 					}
 				}
 			}
@@ -220,3 +220,32 @@ module.exports = function({ types: t, template }) {
 		visitor: ProgramVisitor
 	};
 };
+
+// Registers declarations return by calling path.replace or
+// path.replaceWithMultiple in babel's scope tracker.
+function registerDeclarations(path, declarations) {
+	// path.replace, path.replaceWithMultiple and path.pushContainer should
+	// return and array always. No idea why it is undefined sometimes :(
+	if (declarations === undefined) { return; }
+	declarations.forEach((declaration) => {
+		path.scope.registerDeclaration(declaration);
+	});
+}
+
+// The functions, replaceWith and replaceWithMultiple are meant
+// to replace path.replaceWith and path.replaceWithMultiple for
+// our uses. We need register new declaration to babel's scope
+// tracker otherwise plugins like babel-plugin-transform-typescript
+// throw warning stating DefaultExports, _set__, _get__ are not
+// registred in babel scope tracker.
+function replaceWith(path, node) {
+	const declarations = path.replaceWith(node);
+	registerDeclarations(path, declarations);
+	return declarations;
+}
+
+function replaceWithMultiple(path, nodes) {
+	const declarations = path.replaceWithMultiple(nodes);
+	registerDeclarations(path, declarations);
+	return declarations;
+}
