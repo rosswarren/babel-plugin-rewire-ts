@@ -79,6 +79,7 @@
     "react-dom": "^15.1.0",
     "regenerator-runtime": "^0.9.5",
     "should": "^9.0.2",
-    "sinon": "^1.17.4"
+    "sinon": "^1.17.4",
+    "yargs": "^15.4.1"
   }
 }

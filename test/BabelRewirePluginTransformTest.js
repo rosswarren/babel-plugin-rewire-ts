@@ -5,9 +5,103 @@ var os = require('os');
 var expect = require('expect.js');
 var babelPluginRewire = require('../lib/babel-plugin-rewire.js'); //  */ require('../test-helpers/getBabelPluginRewire.js');
 
+// To run a single test do:
+//   npx mocha test --test <test-one>,<test-2>
+// or (if you do not have npx):
+//   ./node_modules/.bin/mocha test --test <test-one>,<test-2>
+const yargs = require('yargs');
+const { string } = require('yargs');
+const { argv } = yargs
+	.help(true)
+	.option('test',  {
+		alias: 't',
+		type: 'string',
+		describe: 'Run a specific tests (seperate multiple tests by comma).',
+	})
+	.option('fix', {
+		alias: 'f',
+		type: 'boolean',
+		describe: 'Fix failing translation tests by writing correct translation.'
+	});
+
+var featuresToTest = [
+	'babelissue1315',
+	'issue16',
+	'forOf',
+	'commonJSExportOnly',
+	'defaultImport',
+	'defaultExport',
+	'defaultExportImport',
+	'defaultExportWithClass',
+	'defaultExportWithNamedFunction',
+	'defaultExportWithObject',
+	'issuePathReplaceWith',
+	'importWithReactClass',
+	'jsxSupport',
+	'jsxWithComponentImport',
+	'moduleExports',
+	'multipleImports',
+	'multipleImportsWithAliases',
+	'namedFunctionExport',
+	'namedFunctionImport',
+	'namedVariableExport',
+	'noDefaultExport',
+	'passThrough',
+	'primitiveExportWithNamedFunctionExport',
+	'wildcardImport',
+	'wildcardExport',
+	'namedWildcardExport',
+	'recursiveRewireCall',
+	'requireExports',
+	'requireMultiExports',
+	'switch',
+	'topLevelVar',
+	'functionRewireScope',
+	'issue69',
+	'issue71-tdz',
+	'issue71-tdz-index',
+	'flowTypeExport',
+	'flowTypeImport',
+	'updateOperations',
+	'assignmentOperations',
+	'rewiringOfReactComponents',
+	'rewiringOfSimpleFunctionalComponents',
+	'issue121',
+	'issue133',
+	'issue136',
+	'issue152',
+	'issue155',
+	'issue184'
+];
+
+var stage0FeaturesToTests = [
+	'issue164'
+];
+
+
+var ignoredIdentifiers = [
+	'ignoredIdentifiers'
+];
+
+const allTests = [...featuresToTest, ...stage0FeaturesToTests, ...ignoredIdentifiers];
+if (argv.test !== undefined) {
+	const tests = argv.test.split(',');
+	tests.forEach(test => {
+		if (!allTests.includes(test)) {
+			console.error(`${test} is not a valid test.`);
+			process.exit(1);
+		};
+	});
+
+	// Instead of adding a if statement couple of time below
+	// just simply remove every other test from respective test arrays
+	const check = (test) => tests.includes(test);
+	featuresToTest = featuresToTest.filter(check);
+	stage0FeaturesToTests = stage0FeaturesToTests.filter(check);
+	ignoredIdentifiers = ignoredIdentifiers.filter(check);
+}
 
 describe('BabelRewirePluginTest', function() {
-
 	var babelTranslationOptions = {
 		"presets": ["react"],
 		"plugins": [
@@ -103,66 +197,6 @@ describe('BabelRewirePluginTest', function() {
 			plugins: baseOptions.plugins.concat(additionalPlugins)
 		};
 	}
-
-
-	var featuresToTest = [
-		'babelissue1315',
-		'issue16',
-		'forOf',
-		'commonJSExportOnly',
-		'defaultImport',
-		'defaultExport',
-		'defaultExportImport',
-		'defaultExportWithClass',
-		'defaultExportWithNamedFunction',
-		'defaultExportWithObject',
-		'issuePathReplaceWith',
-		'importWithReactClass',
-		'jsxSupport',
-		'jsxWithComponentImport',
-		'moduleExports',
-		'multipleImports',
-		'multipleImportsWithAliases',
-		'namedFunctionExport',
-		'namedFunctionImport',
-		'namedVariableExport',
-		'noDefaultExport',
-		'passThrough',
-		'primitiveExportWithNamedFunctionExport',
-		'wildcardImport',
-		'wildcardExport',
-		'namedWildcardExport',
-		'recursiveRewireCall',
-		'requireExports',
-		'requireMultiExports',
-		'switch',
-		'topLevelVar',
-		'functionRewireScope',
-		'issue69',
-		'issue71-tdz',
-		'issue71-tdz-index',
-		'flowTypeExport',
-		'flowTypeImport',
-		'updateOperations',
-		'assignmentOperations',
-		'rewiringOfReactComponents',
-		'rewiringOfSimpleFunctionalComponents',
-		'issue121',
-		'issue133',
-		'issue136',
-		'issue152',
-		'issue155',
-		'issue184'
-	];
-
-	var stage0FeaturesToTests = [
-		'issue164'
-	];
-
-
-	var ignoredIdentifiers = [
-		'ignoredIdentifiers'
-	];
 
 	featuresToTest.forEach(function(feature) {
 		it('test babel-plugin-rewire for ' + feature, testTranslation.bind(null, feature, babelTranslationOptions));
