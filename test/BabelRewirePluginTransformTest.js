@@ -157,13 +157,6 @@ describe('BabelRewirePluginTest', function() {
 			expect().fail("Transformation failed: \n" + error.stack)
 		}
 
-		var tempDir = path.resolve(os.tmpdir(), 'babel-plugin-rewire');
-		try {
-			fs.mkdirSync(tempDir);
-		} catch(error) {}
-
-		fs.writeFileSync(tempDir + '/testexpected' + testName + '.js', transformationOutput, 'utf-8');
-
 		if (argv.fix === true) {
 			fs.writeFileSync(path.resolve(directory, 'expected.js'), transformationOutput, 'utf-8');
 		}
