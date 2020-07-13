@@ -10,7 +10,6 @@ var babelPluginRewire = require('../lib/babel-plugin-rewire.js'); //  */ require
 // or (if you do not have npx):
 //   ./node_modules/.bin/mocha test --test <test-one>,<test-2>
 const yargs = require('yargs');
-const { string } = require('yargs');
 const { argv } = yargs
 	.help(true)
 	.option('test',  {
@@ -22,7 +21,7 @@ const { argv } = yargs
 		alias: 'f',
 		type: 'boolean',
 		describe: 'Fix failing translation tests by writing correct translation.'
-	});
+	})
 
 var featuresToTest = [
 	'babelissue1315',
@@ -77,7 +76,6 @@ var featuresToTest = [
 var stage0FeaturesToTests = [
 	'issue164'
 ];
-
 
 var ignoredIdentifiers = [
 	'ignoredIdentifiers'
@@ -165,7 +163,10 @@ describe('BabelRewirePluginTest', function() {
 		} catch(error) {}
 
 		fs.writeFileSync(tempDir + '/testexpected' + testName + '.js', transformationOutput, 'utf-8');
-		//fs.writeFileSync(path.resolve(directory, 'expected.js'), transformationOutput, 'utf-8');
+
+		if (argv.fix === true) {
+			fs.writeFileSync(path.resolve(directory, 'expected.js'), transformationOutput, 'utf-8');
+		}
 
 		if (expected.trim() != transformationOutput.trim()) {
 			console.log(transformationOutput);
