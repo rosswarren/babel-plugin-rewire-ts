@@ -6,6 +6,19 @@ var hook = require('node-hook');
 var babelPluginRewire = require('../lib/babel-plugin-rewire.js'); // require('../test-helpers/getBabelPluginRewire.js');
 require('core-js');
 
+// To run a single test do:
+//   npx mocha test --test <test-one>,<test-2>
+// or (if you do not have npx):
+//   ./node_modules/.bin/mocha test --test <test-one>,<test-2>
+const yargs = require('yargs');
+const { argv } = yargs
+	.help(true)
+	.option('test', {
+		alias: 't',
+		type: 'string',
+		description: 'Run a specific tests (seperate multiple tests by comma).'
+	});
+
 function isSampleCode(filename) {
 	var samplesPath = path.resolve(path.join(__dirname, '../samples/'));
 	return (filename.substr(0, samplesPath.length) === samplesPath);
@@ -132,6 +145,23 @@ var configurations = {
 	}
 };
 
+if (argv.test !== undefined) {
+	const tests = argv.test.split(',');
+
+	let allTests = [];
+	for (const config of Object.keys(configurations)) {
+		const { samples } = configurations[config];
+		configurations[config].samples = samples.filter(test => tests.includes(test));
+		allTests = allTests.concat(...configurations[config].samples);
+	}
+
+	tests.forEach(test => {
+		if (!allTests.includes(test)) {
+			console.error(`${test} is not a valid test.`);
+			process.exit(1);
+		}
+	});
+}
 
 Object.keys(configurations).forEach(function(configurationName) {
 	describe(configurationName, function() {
