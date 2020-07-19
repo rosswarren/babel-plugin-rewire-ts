@@ -170,9 +170,14 @@ function UNIVERSAL_SETTER_ID(variableName, value) {
 function UNIVERSAL_RESETTER_ID(variableName) {
 	let rewireData = GET_REWIRE_DATA_IDENTIFIER();
 	delete rewireData[variableName];
-	if(Object.keys(rewireData).length == 0) {
+	if (Object.keys(rewireData).length == 0) {
 		delete GET_REWIRE_REGISTRY_IDENTIFIER()[GET_UNIQUE_GLOBAL_MODULE_ID_IDENTIFIER];
-	};
+	}
+
+	if (EXPORTS_TO_RESET_IDENTIFIER.has(variableName)) {
+		exports[variableName] = EXPORTS_TO_RESET_IDENTIFIER.get(variableName);
+		EXPORTS_TO_RESET_IDENTIFIER.delete(variableName);
+	}
 }
 
 function UNIVERSAL_WITH_ID(object) {

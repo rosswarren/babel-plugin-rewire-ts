@@ -190,7 +190,11 @@ function _reset__(variableName) {
 		delete _getRewireRegistry__()[_getRewireModuleId__];
 	}
 
-	;
+	if (_exports_to_reset__.has(variableName)) {
+		exports[variableName] = _exports_to_reset__.get(variableName);
+
+		_exports_to_reset__.delete(variableName);
+	}
 }
 
 function _with__(object) {
