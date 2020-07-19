@@ -47,6 +47,8 @@ export default class RewireState {
 		this.updateOperationIdentifier = scope.generateUidIdentifier('__update_operation__');
 		this.assignmentOperationIdentifier = scope.generateUidIdentifier('__assign__');
 		this.typeofOriginalExportVariable = scope.generateUidIdentifier('typeOfOriginalExport');
+		this.exportsToResetIdentifier = scope.generateUidIdentifier('__exports_to_reset__');
+		this.recordExportToReset = scope.generateUidIdentifier('__record_export_to_reset__');
 
 		this.universalAccessors = {
 			__get__: noRewire(scope.generateUidIdentifier('__get__')),
@@ -80,7 +82,7 @@ export default class RewireState {
 
 		return this.accessors[variableName];
 	}
-	
+
 	addTrackedIdentifier(variableName, isWildcardImport = false) {
 		this.isWildcardImport[variableName] = isWildcardImport
 		return this.trackedIdentfiers[variableName] = true;
@@ -142,7 +144,9 @@ export default class RewireState {
 			GET_REWIRE_DATA_IDENTIFIER: this.getRewiredDataIdentifier,
 			GET_UNIQUE_GLOBAL_MODULE_ID_IDENTIFIER : this.getUniqueGlobalModuleIdIdentifier,
 			GET_REWIRE_REGISTRY_IDENTIFIER: this.getRewireRegistryIdentifier,
-			UNIQUE_GLOBAL_MODULE_ID_IDENTIFIER: this.uniqueModuleIdIdentifier
+			UNIQUE_GLOBAL_MODULE_ID_IDENTIFIER: this.uniqueModuleIdIdentifier,
+			EXPORTS_TO_RESET_IDENTIFIER: this.exportsToResetIdentifier,
+			RECORD_EXPORT_TO_RESET: this.recordExportToReset,
 		}));
 
 		if(hasWildcardImport) {

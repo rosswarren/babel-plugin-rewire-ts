@@ -47,7 +47,27 @@ function GET_REWIRE_REGISTRY_IDENTIFIER() {
 	if(!theGlobalVariable.__$$GLOBAL_REWIRE_REGISTRY__) {
 		theGlobalVariable.__$$GLOBAL_REWIRE_REGISTRY__ = Object.create(null);
 	}
-	return theGlobalVariable.__$$GLOBAL_REWIRE_REGISTRY__; 
+	return theGlobalVariable.__$$GLOBAL_REWIRE_REGISTRY__;
+}
+
+/**
+ * This map records the variable name to reset as a the key,
+ * and reset value as it's key.
+ */
+const EXPORTS_TO_RESET_IDENTIFIER = new Map();
+function RECORD_EXPORT_TO_RESET(variableName, value) {
+	// Defensively avoid storing non-exported variables.
+	// We intend to use this in __reset__ where it could
+	// be called on non-exported variable.
+	if (!Object.prototype.hasOwnProperty.call(exports, variableName)) {
+		return;
+	}
+
+	// Only record the export if it is not added before,
+	// so we don't record updates of previous __Rewire__ calls.
+	if (!EXPORTS_TO_RESET_IDENTIFIER.has(variableName)) {
+		EXPORTS_TO_RESET_IDENTIFIER.set(variableName, value);
+	}
 }
 
 function GET_REWIRE_DATA_IDENTIFIER() {
@@ -198,7 +218,9 @@ function UNIVERSAL_WITH_ID(object) {
 			"GET_REWIRE_DATA_IDENTIFIER",
 			"GET_UNIQUE_GLOBAL_MODULE_ID_IDENTIFIER",
 			"GET_REWIRE_REGISTRY_IDENTIFIER",
-			"UNIQUE_GLOBAL_MODULE_ID_IDENTIFIER"
+			"UNIQUE_GLOBAL_MODULE_ID_IDENTIFIER",
+			"EXPORTS_TO_RESET_IDENTIFIER",
+			"RECORD_EXPORT_TO_RESET",
 		])});
 
 	const enrichExportTemplate = template(`

@@ -52,6 +52,18 @@ function _getRewireRegistry__() {
 	return theGlobalVariable.__$$GLOBAL_REWIRE_REGISTRY__;
 }
 
+const _exports_to_reset__ = new Map();
+
+function _record_export_to_reset__(variableName, value) {
+	if (!Object.prototype.hasOwnProperty.call(exports, variableName)) {
+		return;
+	}
+
+	if (!_exports_to_reset__.has(variableName)) {
+		_exports_to_reset__.set(variableName, value);
+	}
+}
+
 function _getRewiredData__() {
 	let moduleId = _getRewireModuleId__();
 
