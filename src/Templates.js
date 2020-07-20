@@ -50,6 +50,14 @@ function GET_REWIRE_REGISTRY_IDENTIFIER() {
 	return theGlobalVariable.__$$GLOBAL_REWIRE_REGISTRY__;
 }
 
+function GET_REWIRE_EXPORTS_REGISTRY() {
+	let theGlobalVariable = GET_GLOBAL_VARIABLE_HANDLE_IDENTIFIER();
+	if(!theGlobalVariable.__$$GLOBAL_REWIRE_EXPORTS_REGISTRY__) {
+		theGlobalVariable.__$$GLOBAL_REWIRE_EXPORTS_REGISTRY__ = Object.create(null);
+	}
+	return theGlobalVariable.__$$GLOBAL_REWIRE_EXPORTS_REGISTRY__;
+}
+
 /**
  * This map records the variable name to reset as a the key,
  * and reset value as it's key.
@@ -83,10 +91,16 @@ function GET_REWIRE_DATA_IDENTIFIER() {
 	let moduleId = GET_UNIQUE_GLOBAL_MODULE_ID_IDENTIFIER();
 	let registry = GET_REWIRE_REGISTRY_IDENTIFIER();
 	let rewireData = registry[moduleId];
-	if(!rewireData) {
+	if (!rewireData) {
 		registry[moduleId] = Object.create(null);
 		rewireData = registry[moduleId];
 	}
+
+	let exportsRegistry = GET_REWIRE_EXPORTS_REGISTRY();
+	if (!exportsRegistry[moduleId]) {
+		exportsRegistry[moduleId] = RESTORE_EXPORTS_IDENTIFIER;
+	}
+
 	return rewireData;
 }
 
@@ -236,6 +250,7 @@ function UNIVERSAL_WITH_ID(object) {
 			"EXPORTS_TO_RESET_IDENTIFIER",
 			"RECORD_EXPORT_TO_RESET",
 			"RESTORE_EXPORTS_IDENTIFIER",
+			"GET_REWIRE_EXPORTS_REGISTRY",
 		])});
 
 	const enrichExportTemplate = template(`

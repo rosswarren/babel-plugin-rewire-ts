@@ -99,6 +99,16 @@ function _getRewireRegistry__() {
 	return theGlobalVariable.__$$GLOBAL_REWIRE_REGISTRY__;
 }
 
+function _getRewireExportsRegistry__() {
+	let theGlobalVariable = _getGlobalObject();
+
+	if (!theGlobalVariable.__$$GLOBAL_REWIRE_EXPORTS_REGISTRY__) {
+		theGlobalVariable.__$$GLOBAL_REWIRE_EXPORTS_REGISTRY__ = Object.create(null);
+	}
+
+	return theGlobalVariable.__$$GLOBAL_REWIRE_EXPORTS_REGISTRY__;
+}
+
 const _exports_to_reset__ = new Map();
 
 function _record_export_to_reset__(variableName, value) {
@@ -131,6 +141,12 @@ function _getRewiredData__() {
 	if (!rewireData) {
 		registry[moduleId] = Object.create(null);
 		rewireData = registry[moduleId];
+	}
+
+	let exportsRegistry = _getRewireExportsRegistry__();
+
+	if (!exportsRegistry[moduleId]) {
+		exportsRegistry[moduleId] = _restore_exports__;
 	}
 
 	return rewireData;
