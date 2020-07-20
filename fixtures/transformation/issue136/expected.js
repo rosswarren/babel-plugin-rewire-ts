@@ -73,6 +73,16 @@ function _record_export_to_reset__(variableName, value) {
 	}
 }
 
+function _restore_exports__() {
+	const entries = _exports_to_reset__.entries();
+
+	for (const [variableName, value] of entries) {
+		exports[variableName] = value;
+	}
+
+	_exports_to_reset__.clear();
+}
+
 function _getRewiredData__() {
 	let moduleId = _getRewireModuleId__();
 

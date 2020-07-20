@@ -49,6 +49,7 @@ export default class RewireState {
 		this.typeofOriginalExportVariable = scope.generateUidIdentifier('typeOfOriginalExport');
 		this.exportsToResetIdentifier = scope.generateUidIdentifier('__exports_to_reset__');
 		this.recordExportToReset = scope.generateUidIdentifier('__record_export_to_reset__');
+		this.restoreExportsIdentifier = scope.generateUidIdentifier('__restore_exports__');
 
 		this.universalAccessors = {
 			__get__: noRewire(scope.generateUidIdentifier('__get__')),
@@ -147,6 +148,7 @@ export default class RewireState {
 			UNIQUE_GLOBAL_MODULE_ID_IDENTIFIER: this.uniqueModuleIdIdentifier,
 			EXPORTS_TO_RESET_IDENTIFIER: this.exportsToResetIdentifier,
 			RECORD_EXPORT_TO_RESET: this.recordExportToReset,
+			RESTORE_EXPORTS_IDENTIFIER: this.restoreExportsIdentifier,
 		}));
 
 		if(hasWildcardImport) {

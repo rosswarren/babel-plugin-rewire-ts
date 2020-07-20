@@ -70,6 +70,15 @@ function RECORD_EXPORT_TO_RESET(variableName, value) {
 	}
 }
 
+function RESTORE_EXPORTS_IDENTIFIER() {
+	const entries = EXPORTS_TO_RESET_IDENTIFIER.entries();
+	for (const [variableName, value] of entries) {
+		exports[variableName] = value;
+	}
+
+	EXPORTS_TO_RESET_IDENTIFIER.clear();
+}
+
 function GET_REWIRE_DATA_IDENTIFIER() {
 	let moduleId = GET_UNIQUE_GLOBAL_MODULE_ID_IDENTIFIER();
 	let registry = GET_REWIRE_REGISTRY_IDENTIFIER();
@@ -226,6 +235,7 @@ function UNIVERSAL_WITH_ID(object) {
 			"UNIQUE_GLOBAL_MODULE_ID_IDENTIFIER",
 			"EXPORTS_TO_RESET_IDENTIFIER",
 			"RECORD_EXPORT_TO_RESET",
+			"RESTORE_EXPORTS_IDENTIFIER",
 		])});
 
 	const enrichExportTemplate = template(`
