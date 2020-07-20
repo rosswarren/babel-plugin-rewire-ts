@@ -51,6 +51,7 @@ export default class RewireState {
 		this.recordExportToReset = scope.generateUidIdentifier('__record_export_to_reset__');
 		this.restoreExportsIdentifier = scope.generateUidIdentifier('__restore_exports__');
 		this.getRewireExportsRegistry = scope.generateUidIdentifier('__getRewireExportsRegistry__');
+		this.mayebeUpdateExportIdentifier = scope.generateUidIdentifier('__maybe_update_export__');
 
 		this.universalAccessors = {
 			__get__: noRewire(scope.generateUidIdentifier('__get__')),
@@ -151,6 +152,7 @@ export default class RewireState {
 			RECORD_EXPORT_TO_RESET: this.recordExportToReset,
 			RESTORE_EXPORTS_IDENTIFIER: this.restoreExportsIdentifier,
 			GET_REWIRE_EXPORTS_REGISTRY: this.getRewireExportsRegistry,
+			MAYBE_UPDATE_EXPORT_IDENTIFIER: this.mayebeUpdateExportIdentifier,
 		}));
 
 		if(hasWildcardImport) {

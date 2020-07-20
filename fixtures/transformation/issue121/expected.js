@@ -86,6 +86,16 @@ function _restore_exports__() {
 	_exports_to_reset__.clear();
 }
 
+function _maybe_update_export__(variableName, value) {
+	if (!Object.prototype.hasOwnProperty.call(exports, variableName)) {
+		return;
+	}
+
+	_record_export_to_reset__(variableName, exports[variableName]);
+
+	exports[variableName] = value;
+}
+
 function _getRewiredData__() {
 	let moduleId = _getRewireModuleId__();
 
