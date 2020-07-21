@@ -118,6 +118,13 @@ function GET_REWIRE_DATA_IDENTIFIER() {
 	if(!theGlobalVariable['__rewire_reset_all__']) {
 		theGlobalVariable['__rewire_reset_all__'] = function() {
 			theGlobalVariable.__$$GLOBAL_REWIRE_REGISTRY__ = Object.create(null);
+
+			const exportsRegistry = GET_REWIRE_EXPORTS_REGISTRY();
+			for (const restoreFunc of Object.values(exportsRegistry)) {
+				restoreFunc();
+			}
+
+			theGlobalVariable.__$$GLOBAL_REWIRE_EXPORTS_REGISTRY__ = Object.create(null);
 		};
 	}
 })();

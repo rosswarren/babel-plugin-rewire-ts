@@ -116,6 +116,14 @@ function _getRewiredData__() {
 	if (!theGlobalVariable['__rewire_reset_all__']) {
 		theGlobalVariable['__rewire_reset_all__'] = function () {
 			theGlobalVariable.__$$GLOBAL_REWIRE_REGISTRY__ = Object.create(null);
+
+			const exportsRegistry = _getRewireExportsRegistry__();
+
+			for (const restoreFunc of Object.values(exportsRegistry)) {
+				restoreFunc();
+			}
+
+			theGlobalVariable.__$$GLOBAL_REWIRE_EXPORTS_REGISTRY__ = Object.create(null);
 		};
 	}
 })();
