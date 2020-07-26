@@ -92,7 +92,8 @@ var configurations = {
 			'issue163',
 			'issue165',
 			'issue109',
-			'issue184'
+			'issue184',
+			'ExportsSyncsWithInternalState',
 		]
 	},
 	transformSampleCodeToTestWithBabelPluginRewireAndTransformAsyncToGenerator: {

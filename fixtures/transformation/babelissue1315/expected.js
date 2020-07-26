@@ -231,6 +231,8 @@ function _assign__(variableName, value) {
 	if (rewireData[variableName] === undefined) {
 		return _set_original__(variableName, value);
 	} else {
+		_maybe_update_export__(variableName, value);
+
 		return rewireData[variableName] = value;
 	}
 }
@@ -264,6 +266,8 @@ function _set__(variableName, value) {
 			});
 		};
 	} else {
+		_maybe_update_export__(variableName, value);
+
 		if (value === undefined) {
 			rewireData[variableName] = INTENTIONAL_UNDEFINED;
 		} else {

@@ -168,6 +168,7 @@ function ASSIGNMENT_OPERATION_IDENTIFIER(variableName, value) {
 	if(rewireData[variableName] === undefined) {
 		return ORIGINAL_VARIABLE_SETTER_IDENTIFIER(variableName, value);
 	} else {
+		MAYBE_UPDATE_EXPORT_IDENTIFIER(variableName, value);
 		return rewireData[variableName] = value;
 	}
 }
@@ -194,6 +195,7 @@ function UNIVERSAL_SETTER_ID(variableName, value) {
 			});
 		}
 	} else {
+		MAYBE_UPDATE_EXPORT_IDENTIFIER(variableName, value);
 		if (value === undefined) {
 			rewireData[variableName] = INTENTIONAL_UNDEFINED
 		} else {
