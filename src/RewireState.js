@@ -37,6 +37,7 @@ export default class RewireState {
 		this.isWildcardImport = {};
 		this.ignoredIdentifiers = [];
 		this.updateableVariables = {};
+		this.syncInternalStateWithExports = true;
 		this.getGlobalVariableHandleIdentifier = scope.generateUidIdentifier('getGlobalObject');
 		this.getRewiredDataIdentifier = scope.generateUidIdentifier('__getRewiredData__');
 		this.getRewireRegistryIdentifier = scope.generateUidIdentifier('__getRewireRegistry__');
@@ -131,6 +132,17 @@ export default class RewireState {
 			t.returnStatement(noRewire(t.identifier('undefined')))
 		]));
 
+		const syncInternalStateWithExportsId = scope.generateUidIdentifier(
+			'__sync_internal_state_with_exports__'
+		);
+
+		const syncInternalStateWithExports = t.variableDeclaration("const", [
+			t.variableDeclarator(
+				syncInternalStateWithExportsId,
+				t.booleanLiteral(this.syncInternalStateWithExports)
+			)
+		]);
+
 		this.prependToProgramBody(universalAccesorsTemplate({
 			ORIGINAL_VARIABLE_ACCESSOR_IDENTIFIER: this.originalVariableAccessorIdentifier,
 			ORIGINAL_VARIABLE_SETTER_IDENTIFIER: this.originalVariableSetterIdentifier,
@@ -153,6 +165,8 @@ export default class RewireState {
 			RESTORE_EXPORTS_IDENTIFIER: this.restoreExportsIdentifier,
 			GET_REWIRE_EXPORTS_REGISTRY: this.getRewireExportsRegistry,
 			MAYBE_UPDATE_EXPORT_IDENTIFIER: this.mayebeUpdateExportIdentifier,
+			SYNC_INTERNAL_STATE_WITH_EXPORTS_IDENTIFIER: syncInternalStateWithExportsId,
+			SYNC_INTERNAL_STATE_WITH_EXPORTS: syncInternalStateWithExports,
 		}));
 
 		if(hasWildcardImport) {

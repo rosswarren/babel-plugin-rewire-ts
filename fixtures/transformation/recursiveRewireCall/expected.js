@@ -145,9 +145,15 @@ function _getRewireExportsRegistry__() {
 	return theGlobalVariable.__$$GLOBAL_REWIRE_EXPORTS_REGISTRY__;
 }
 
+const _sync_internal_state_with_exports__ = true;
+
 const _exports_to_reset__ = new Map();
 
 function _record_export_to_reset__(variableName, value) {
+	if (!_sync_internal_state_with_exports__) {
+		return;
+	}
+
 	if (!Object.prototype.hasOwnProperty.call(exports, variableName)) {
 		return;
 	}
@@ -168,6 +174,10 @@ function _restore_exports__() {
 }
 
 function _maybe_update_export__(variableName, value) {
+	if (!_sync_internal_state_with_exports__) {
+		return;
+	}
+
 	if (!Object.prototype.hasOwnProperty.call(exports, variableName)) {
 		return;
 	}

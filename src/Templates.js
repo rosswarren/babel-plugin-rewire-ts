@@ -58,12 +58,18 @@ function GET_REWIRE_EXPORTS_REGISTRY() {
 	return theGlobalVariable.__$$GLOBAL_REWIRE_EXPORTS_REGISTRY__;
 }
 
+SYNC_INTERNAL_STATE_WITH_EXPORTS
+
 /**
  * This map records the variable name to reset as a the key,
  * and reset value as it's key.
  */
 const EXPORTS_TO_RESET_IDENTIFIER = new Map();
 function RECORD_EXPORT_TO_RESET(variableName, value) {
+	if (!SYNC_INTERNAL_STATE_WITH_EXPORTS_IDENTIFIER) {
+		return;
+	}
+
 	// Defensively avoid storing non-exported variables.
 	// We intend to use this in __reset__ where it could
 	// be called on non-exported variable.
@@ -88,6 +94,10 @@ function RESTORE_EXPORTS_IDENTIFIER() {
 }
 
 function MAYBE_UPDATE_EXPORT_IDENTIFIER(variableName, value) {
+	if (!SYNC_INTERNAL_STATE_WITH_EXPORTS_IDENTIFIER) {
+		return;
+	}
+
 	if (!Object.prototype.hasOwnProperty.call(exports, variableName)) {
 		return;
 	}
@@ -270,6 +280,8 @@ function UNIVERSAL_WITH_ID(object) {
 			"RESTORE_EXPORTS_IDENTIFIER",
 			"GET_REWIRE_EXPORTS_REGISTRY",
 			"MAYBE_UPDATE_EXPORT_IDENTIFIER",
+			"SYNC_INTERNAL_STATE_WITH_EXPORTS",
+			"SYNC_INTERNAL_STATE_WITH_EXPORTS_IDENTIFIER",
 		])});
 
 	const enrichExportTemplate = template(`

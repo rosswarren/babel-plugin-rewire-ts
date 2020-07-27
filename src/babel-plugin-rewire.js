@@ -194,6 +194,9 @@ module.exports = function({ types: t, template }) {
 				if (!wasProcessed(path)) {
 					let rewireState = new RewireState(path.scope, t, template);
 					rewireState.setIgnoredIdentifiers(state.opts.ignoredIdentifiers);
+					if (state.opts.syncInternalStateWithExports === false) {
+						rewireState.syncInternalStateWithExports = false;
+					}
 
 					path.traverse(BodyVisitor, rewireState);
 
